@@ -1,12 +1,21 @@
 {
   "name": "express",
   "type": "module",
+  "scripts": {
+    "dev": "bun run prisma:generate && bun run prisma:migrate && bun run --watch src/index.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:reset": "prisma migrate reset"
+  },
   "dependencies": {
+    "@prisma/client": "^6.16.2",
     "express": "5.1.0"
   },
   "devDependencies": {
-    "@types/node": "20.11.17",
     "@types/express": "5.0.0",
+    "@types/node": "20.11.17",
+    "prisma": "^6.16.2",
     "typescript": "5.8.3"
   }
 }
