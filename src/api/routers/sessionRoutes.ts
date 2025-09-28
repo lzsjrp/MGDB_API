@@ -1,7 +1,7 @@
-import * as sessionController from '../controllers/sessionController';
+import * as sessionController from '../controllers/sessionController.js';
 
 import { Router } from 'express';
-import { useToken } from '../middlewares/useToken';
+import { useToken } from '../middlewares/useToken.js';
 
 const router = Router();
 

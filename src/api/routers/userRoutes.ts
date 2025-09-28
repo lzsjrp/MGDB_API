@@ -1,7 +1,7 @@
-import * as userController from '../controllers/userController';
+import * as userController from '../controllers/userController.js';
 
 import { Router } from 'express';
-import { useToken } from '../middlewares/useToken';
+import { useToken } from '../middlewares/useToken.js';
 
 const router = Router();
 

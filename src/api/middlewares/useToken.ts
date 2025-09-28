@@ -1,4 +1,4 @@
-import prisma from "../lib/prisma";
+import prisma from "../lib/prisma.js";
 
 export const useToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
