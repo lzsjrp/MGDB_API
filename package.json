@@ -10,10 +10,13 @@
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
-    "express": "5.1.0"
+    "express": "5.1.0",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
+    "@types/bun": "^1.2.22",
     "@types/express": "5.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "20.11.17",
     "prisma": "^6.16.2",
     "typescript": "5.8.3"

@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "NodeNext",
+    "module": "ESNext",
     "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
   },
   "exclude": ["node_modules"]
 }
