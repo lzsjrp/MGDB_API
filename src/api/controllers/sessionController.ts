@@ -1,5 +1,6 @@
 import prisma from "../lib/prisma.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 export const createSession = async (req, res) => {
     const { email, password } = req.body || {};
@@ -13,7 +14,7 @@ export const createSession = async (req, res) => {
         if (!user) {
             return res.status(401).json({ error: "Invalid email or password" });
         }
-        const isPasswordValid = await Bun.password.verify(password, user.password);
+        const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(401).json({ error: "Invalid email or password" });
         }

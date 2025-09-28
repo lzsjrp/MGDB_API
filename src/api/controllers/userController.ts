@@ -1,4 +1,5 @@
 import prisma from "../lib/prisma.js";
+import bcrypt from "bcrypt";
 
 export const createUser = async (req, res) => {
     const { email, name, password } = req.body || {};
@@ -6,7 +7,7 @@ export const createUser = async (req, res) => {
         return res.status(400).json({ error: "Missing required fields" });
     }
     try {
-        const hash = await Bun.password.hash(password);
+        const hash = await bcrypt.hash(password, 10);
         prisma.$transaction(async (tx) => {
             const existingUser = await tx.user.findUnique({ where: { email } });
             if (existingUser) {
@@ -97,7 +98,7 @@ export const updateUser = async (req, res) => {
             if (email) updateData.email = email;
             if (name) updateData.name = name;
             if (password) {
-                updateData.password = await Bun.password.hash(password);
+                updateData.password = await bcrypt.hash(password, 10);
                 await tx.session.deleteMany({ where: { userId: user.id } });
             }
             const updatedUser = await tx.user.update({
