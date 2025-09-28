@@ -18,7 +18,7 @@ export const createSession = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ error: "Invalid email or password" });
         }
-        const token = jwt.sign({ userId: user.id }, Bun.env.JWT_SECRET, { expiresIn: "7d" });
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "7d" });
         const session = await prisma.session.create({
             data: {
                 userId: user.id,
