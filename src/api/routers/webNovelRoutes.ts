@@ -12,6 +12,7 @@ router.delete('/:webnovelId', useToken, webnovelController.deleteWebNovel);
 router.patch('/:webnovelId', useToken, webnovelController.updateWebNovel);
 
 router.post('/:webnovelId/chapters', useToken, chapterController.createChapter);
+router.get('/:webnovelId/chapters', chapterController.getChapterList);
 router.get('/:webnovelId/chapters/:chapterId', chapterController.getChapter);
 router.delete('/:webnovelId/chapters/:chapterId', useToken, chapterController.deleteChapter);
 router.patch('/:webnovelId/chapters/:chapterId', useToken, chapterController.updateChapter);

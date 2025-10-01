@@ -1,18 +1,12 @@
 import prisma from "../lib/prisma.js";
 
 export const createChapter = async (req, res) => {
-    console.log(req.params)
     if (!req.body.number || !req.body.volume || !req.body.type) {
         return res.status(400).json({ error: "Number, volume, and type are required" });
     }
     try {
-        if (req.body.type !== "Manga" && req.body.type !== "Light Novel" && req.body.type !== "One Shot") {
-            return res.status(400).json({ error: "Invalid type. Must be 'Manga', 'Light Novel', or 'One Shot'" });
-        }
-        if (req.body.type === "One Shot") {
-            req.body.volume = "One Shot"
-            req.body.number = 1;
-            return res.status(400).json({ error: "Not implemented yet" });
+        if (req.body.type !== "Manga" && req.body.type !== "Light Novel") {
+            return res.status(400).json({ error: "Invalid type. Must be 'Manga' or 'Light Novel'" });
         }
         if (req.body.type === "Manga") {
             return res.status(400).json({ error: "Not implemented yet" });
@@ -85,20 +79,57 @@ export const getChapter = async (req, res) => {
     }
 }
 
+export const getChapterList = async (req, res) => {
+    const { webnovelId, mangaId } = req.params;
+    if (webnovelId) {
+        try {
+            const chapterList = await prisma.novelChapter.findMany()
+            return res.status(200).json({ id: webnovelId, chapters: chapterList })
+        } catch (error) {
+            return res.status(500).json({ error: "Failed to retrieve chapters", errorDetails: error.message });
+        }
+    }
+    if (mangaId) {
+        try {
+            const chapterList = await prisma.mangaChapter.findMany()
+            return res.status(200).json({ id: webnovelId, chapters: chapterList })
+        } catch (error) {
+            return res.status(500).json({ error: "Failed to retrieve chapters", errorDetails: error.message });
+        }
+    }
+}
+
 export const deleteChapter = async (req, res) => {
-    const { chapterId } = req.params;
-    try {
-        const chapter = await prisma.novelChapter.findUnique({ where: { id: chapterId } })
-        if (!chapter) {
-            return res.status(404).json({ error: "Chapter not found" });
+    const { webnovelId, mangaId, chapterId } = req.params;
+    if (webnovelId) {
+        try {
+            const chapter = await prisma.novelChapter.findUnique({ where: { id: chapterId } })
+            if (!chapter) {
+                return res.status(404).json({ error: "Chapter not found" });
+            }
+            if (chapter.addedBy !== req.session.userId) {
+                return res.status(403).json({ error: "You do not have permission to delete this chapter" });
+            }
+            await prisma.novelChapter.delete({ where: { id: chapterId } });
+            res.status(200).json({ id: chapterId, message: "Chapter deleted successfully", chapter });
+        } catch (error) {
+            res.status(500).json({ error: "Failed to delete chapter", errorDetails: error.message });
         }
-        if (chapter.addedBy !== req.session.userId) {
-            return res.status(403).json({ error: "You do not have permission to delete this chapter" });
+    }
+    if (mangaId) {
+        try {
+            const chapter = await prisma.mangaChapter.findUnique({ where: { id: chapterId } })
+            if (!chapter) {
+                return res.status(404).json({ error: "Chapter not found" });
+            }
+            if (chapter.addedBy !== req.session.userId) {
+                return res.status(403).json({ error: "You do not have permission to delete this chapter" });
+            }
+            await prisma.novelChapter.delete({ where: { id: chapterId } });
+            res.status(200).json({ id: chapterId, message: "Chapter deleted successfully", chapter });
+        } catch (error) {
+            res.status(500).json({ error: "Failed to delete chapter", errorDetails: error.message });
         }
-        await prisma.novelChapter.delete({ where: { id: chapterId } });
-        res.status(200).json({ id: chapterId, message: "Chapter deleted successfully", chapter });
-    } catch (error) {
-        res.status(500).json({ error: "Failed to delete chapter", errorDetails: error.message });
     }
 }
 

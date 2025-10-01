@@ -10,6 +10,7 @@ router.delete('/:mangaId', mangaController.deleteManga);
 router.patch('/:mangaId', mangaController.updateManga);
 
 router.post('/:mangaId/chapters', chapterController.createChapter);
+router.get('/:mangaId/chapters', chapterController.getChapterList);
 router.get('/:mangaId/chapters/:chapterId', chapterController.getChapter);
 router.delete('/:mangaId/chapters/:chapterId', chapterController.deleteChapter);
 router.patch('/:mangaId/chapters/:chapterId', chapterController.updateChapter);
