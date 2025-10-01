@@ -8,5 +8,7 @@ router.get('/', (_req, res) => {
 
 router.use('/users', (await import('./routers/userRoutes.js')).default);
 router.use('/session', (await import('./routers/sessionRoutes.js')).default);
+router.use('/manga', (await import('./routers/mangaRoutes.js')).default);
+router.use('/webnovel', (await import('./routers/webNovelRoutes.js')).default);
 
 export default router;

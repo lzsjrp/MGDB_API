@@ -15,10 +15,11 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String
-  password  String
+  id       String @id @default(uuid())
+  email    String @unique
+  name     String
+  password String
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -26,9 +27,10 @@ model User {
 }
 
 model Session {
-  id        String   @id @default(uuid())
-  userId    String
-  token     String   @unique
+  id     String @id @default(uuid())
+  userId String
+  token  String @unique
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   expiresAt DateTime
@@ -36,4 +38,133 @@ model Session {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model Manga {
+  id          String   @id @default(uuid())
+  title       String
+  author      String
+  description String?
+  type        String
+  status      String
+  addedBy     String
+  genre       String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapters   MangaChapter[]
+  MangaCover MangaCover[]
+}
+
+model MangaChapter {
+  id         String @id @default(uuid())
+  mangaId    String
+  title      String
+  number     Int
+  pagesCount Int
+  addedBy    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  manga Manga @relation(fields: [mangaId], references: [id], onDelete: Cascade)
+
+  ChapterPage MangaChapterPage[]
+
+  @@index([mangaId])
+}
+
+model MangaChapterPage {
+  id         String @id @default(uuid())
+  chapterId  String
+  pageNumber Int
+  imageUrl   String
+  addedBy    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapter MangaChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@index([chapterId])
+}
+
+model WebNovel {
+  id          String   @id @default(uuid())
+  title       String
+  author      String
+  description String?
+  type        String
+  status      String
+  addedBy     String
+  genre       String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapter    NovelVolume[]
+  NovelCover NovelCover[]
+}
+
+model NovelVolume {
+  id         String @id @default(uuid())
+  webNovelId String
+  title      String
+  number     Int
+  addedBy    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  webNovel WebNovel @relation(fields: [webNovelId], references: [id], onDelete: Cascade)
+
+  chapters NovelChapter[]
+
+  @@index([webNovelId])
+}
+
+model NovelChapter {
+  id         String @id @default(uuid())
+  webNovelId String
+  volumeId   String
+  title      String
+  number     Int
+  content    String
+  addedBy    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  volume NovelVolume @relation(fields: [volumeId], references: [id], onDelete: Cascade)
+
+  @@index([volumeId])
+}
+
+model MangaCover {
+  id       String @id @default(uuid())
+  mangaId  String
+  imageUrl String
+  addedBy  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  manga Manga @relation(fields: [mangaId], references: [id], onDelete: Cascade)
+
+  @@index([mangaId])
+}
+
+model NovelCover {
+  id         String @id @default(uuid())
+  webNovelId String
+  imageUrl   String
+  addedBy    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  webNovel WebNovel @relation(fields: [webNovelId], references: [id], onDelete: Cascade)
+
+  @@index([webNovelId])
 }
