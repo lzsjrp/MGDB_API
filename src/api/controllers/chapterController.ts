@@ -101,15 +101,29 @@ export const createChapter = async (req, res) => {
 }
 
 export const getChapter = async (req, res) => {
-    const { chapterId } = req.params;
+    const { webnovelId, mangaId, chapterId } = req.params;
     try {
-        const chapter = await prisma.novelChapter.findUnique({
-            where: { id: chapterId },
-        });
-        if (!chapter) {
-            return res.status(404).json({ error: "Chapter not found" });
+        if (webnovelId) {
+            const chapter = await prisma.novelChapter.findUnique({
+                where: { id: chapterId },
+            });
+            if (!chapter) {
+                return res.status(404).json({ error: "Chapter not found" });
+            }
+            res.status(200).json({ id: chapter.id, chapter });
         }
-        res.status(200).json({ id: chapter.id, chapter });
+        if (mangaId) {
+            const chapter = await prisma.mangaChapter.findUnique({
+                where: { id: chapterId },
+                include: {
+                    pages: true
+                }
+            });
+            if (!chapter) {
+                return res.status(404).json({ error: "Chapter not found" });
+            }
+            res.status(200).json({ id: chapter.id, chapter });
+        }
     } catch (error) {
         res.status(500).json({ error: "Failed to retrieve chapter", errorDetails: error.message });
     }

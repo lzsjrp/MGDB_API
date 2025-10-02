@@ -1,12 +1,22 @@
 {
   "name": "express",
   "type": "module",
+  "tsup": {
+    "entry": [
+      "src/index.ts"
+    ],
+    "splitting": false,
+    "sourcemap": true,
+    "clean": true,
+    "minify": true
+  },
   "scripts": {
     "dev": "bun run prisma:generate && bun run prisma:migrate && bun run --watch src/index.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
-    "prisma:reset": "prisma migrate reset"
+    "prisma:reset": "prisma migrate reset",
+    "build": "tsup"
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
@@ -23,6 +33,7 @@
     "@types/multer": "^2.0.0",
     "@types/node": "20.11.17",
     "prisma": "^6.16.2",
+    "tsup": "^8.5.0",
     "typescript": "5.8.3"
   }
 }

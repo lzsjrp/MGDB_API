@@ -6,11 +6,17 @@ router.get('/', (_req, res) => {
     res.json({ version: '1' });
 });
 
-router.use('/users', (await import('./routers/userRoutes.js')).default);
-router.use('/session', (await import('./routers/sessionRoutes.js')).default);
-router.use('/manga', (await import('./routers/mangaRoutes.js')).default);
-router.use('/webnovel', (await import('./routers/webNovelRoutes.js')).default);
-router.use('/covers', (await import('./routers/coversRoutes.js')).default);
+import userRoutes from './routers/userRoutes.js'
+import sessionRoutes from './routers/sessionRoutes.js'
+import mangaRoutes from './routers/mangaRoutes.js'
+import webNovelRoutes from './routers/webNovelRoutes.js'
+import coversRoutes from './routers/coversRoutes.js'
+
+router.use('/users', userRoutes);
+router.use('/session', sessionRoutes);
+router.use('/manga', mangaRoutes);
+router.use('/webnovel', webNovelRoutes);
+router.use('/covers', coversRoutes);
 
 
 export default router;

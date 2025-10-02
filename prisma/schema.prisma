@@ -69,7 +69,7 @@ model MangaChapter {
 
   manga Manga @relation(fields: [mangaId], references: [id], onDelete: Cascade)
 
-  ChapterPage MangaChapterPage[]
+  pages MangaChapterPage[]
 
   @@index([mangaId])
 }

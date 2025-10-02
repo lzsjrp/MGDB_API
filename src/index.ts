@@ -5,7 +5,9 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-app.use('/api', (await import('./api/index.js')).default)
+import apiRoutes from './api/index.js'
+
+app.use('/api', apiRoutes)
 
 export default app
 
