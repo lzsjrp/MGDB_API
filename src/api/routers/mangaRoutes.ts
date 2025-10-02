@@ -1,6 +1,9 @@
 import express from 'express';
+import multer from 'multer';
 import * as titleController from '../controllers/titleController.js';
 import * as chapterController from '../controllers/chapterController.js';
+
+const upload = multer({ storage: multer.memoryStorage() })
 
 import { useToken } from '../middlewares/useToken.js';
 

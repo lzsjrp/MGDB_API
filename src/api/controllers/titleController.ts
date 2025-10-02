@@ -42,11 +42,11 @@ export const createTitle = async (req, res) => {
 }
 
 export const getTitle = async (req, res) => {
-    const { webnovelId, mangaId } = req.params;
+    const { webNovelId, mangaId } = req.params;
     try {
-        if (webnovelId) {
+        if (webNovelId) {
             const webNovel = await prisma.webNovel.findUnique({
-                where: { id: webnovelId },
+                where: { id: webNovelId },
                 include: { volumes: true },
             });
             if (!webNovel) {
@@ -70,18 +70,18 @@ export const getTitle = async (req, res) => {
 }
 
 export const deleteTitle = async (req, res) => {
-    const { webnovelId, mangaId } = req.params;
+    const { webNovelId, mangaId } = req.params;
     try {
-        if (webnovelId) {
-            const webNovel = await prisma.webNovel.findUnique({ where: { id: webnovelId } });
+        if (webNovelId) {
+            const webNovel = await prisma.webNovel.findUnique({ where: { id: webNovelId } });
             if (!webNovel) {
                 return res.status(404).json({ error: "Web novel not found" });
             }
             if (webNovel.addedBy !== req.session.userId) {
                 return res.status(403).json({ error: "You do not have permission to delete this web novel" });
             }
-            await prisma.webNovel.delete({ where: { id: webnovelId } });
-            res.status(200).json({ id: webnovelId, message: "Web novel deleted successfully", webNovel });
+            await prisma.webNovel.delete({ where: { id: webNovelId } });
+            res.status(200).json({ id: webNovelId, message: "Web novel deleted successfully", webNovel });
         }
         if (mangaId) {
             const manga = await prisma.manga.findUnique({ where: { id: mangaId } });
@@ -100,10 +100,10 @@ export const deleteTitle = async (req, res) => {
 }
 
 export const updateTitle = async (req, res) => {
-    const { webnovelId, mangaId } = req.params;
+    const { webNovelId, mangaId } = req.params;
     try {
-        if (webnovelId) {
-            const webNovel = await prisma.webNovel.findUnique({ where: { id: webnovelId } });
+        if (webNovelId) {
+            const webNovel = await prisma.webNovel.findUnique({ where: { id: webNovelId } });
             if (!webNovel) {
                 return res.status(404).json({ error: "Web novel not found" });
             }
@@ -111,7 +111,7 @@ export const updateTitle = async (req, res) => {
                 return res.status(403).json({ error: "You do not have permission to update this web novel" });
             }
             const updatedWebNovel = await prisma.webNovel.update({
-                where: { id: webnovelId },
+                where: { id: webNovelId },
                 data: {
                     title: req.body.title || webNovel.title,
                     author: req.body.author || webNovel.author,

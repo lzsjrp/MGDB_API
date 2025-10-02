@@ -1,20 +1,18 @@
 import prisma from "../lib/prisma.js";
 
+import { createClient } from "@supabase/supabase-js"
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+
 export const createChapter = async (req, res) => {
-    if (!req.body.number || !req.body.volume || !req.body.type) {
-        return res.status(400).json({ error: "Number, volume, and type are required" });
-    }
+    const { webNovelId, mangaId } = req.params;
     try {
-        if (req.body.type !== "Manga" && req.body.type !== "Light Novel") {
-            return res.status(400).json({ error: "Invalid type. Must be 'Manga' or 'Light Novel'" });
-        }
-        if (req.body.number < 1) {
+        if (!req.body.number || req.body.number < 1) {
             return res.status(400).json({ error: "Number must be a positive integer" });
         }
-        if (req.body.type === "Manga") {
+        if (mangaId) {
             const existingManga = await prisma.manga.findUnique({
                 where: {
-                    id: req.params.mangaId
+                    id: mangaId
                 }
             })
             if (!existingManga) {
@@ -22,7 +20,7 @@ export const createChapter = async (req, res) => {
             }
             const existingChapter = await prisma.mangaChapter.findFirst({
                 where: {
-                    mangaId: req.params.mangaId,
+                    mangaId: mangaId,
                     number: Number(req.body.number),
                 },
             });
@@ -32,7 +30,7 @@ export const createChapter = async (req, res) => {
             await prisma.$transaction(async (tx) => {
                 const newChapter = await tx.mangaChapter.create({
                     data: {
-                        mangaId: req.params.mangaId,
+                        mangaId,
                         title: req.body.title || `Chapter ${req.body.number}`,
                         number: Number(req.body.number),
                         pagesCount: 0,
@@ -42,13 +40,13 @@ export const createChapter = async (req, res) => {
                 return res.status(201).json({ id: newChapter.id, message: "Chapter created successfully", chapter: newChapter });
             })
         }
-        if (req.body.type === "Light Novel") {
+        if (webNovelId) {
             if (!req.body.volume || req.body.volume < 1) {
                 return res.status(400).json({ error: "Volume must be a positive integer" });
             }
             const existingWebNovel = await prisma.webNovel.findUnique({
                 where: {
-                    id: req.params.webNovelId
+                    id: webNovelId
                 }
             })
             if (!existingWebNovel) {
@@ -56,7 +54,7 @@ export const createChapter = async (req, res) => {
             }
             const existingChapter = await prisma.novelChapter.findFirst({
                 where: {
-                    webNovelId: req.params.webnovelId,
+                    webNovelId: webNovelId,
                     number: Number(req.body.number),
                 },
             });
@@ -66,7 +64,7 @@ export const createChapter = async (req, res) => {
             await prisma.$transaction(async (tx) => {
                 const volume = await tx.novelVolume.findFirst({
                     where: {
-                        webNovelId: req.params.webnovelId,
+                        webNovelId: webNovelId,
                         number: Number(req.body.volume),
                     },
                 });
@@ -74,7 +72,7 @@ export const createChapter = async (req, res) => {
                 if (!volume) {
                     newVolume = await tx.novelVolume.create({
                         data: {
-                            webNovelId: req.params.webnovelId,
+                            webNovelId: webNovelId,
                             number: Number(req.body.volume),
                             addedBy: req.session.userId,
                             title: req.body.volumeTitle || `Volume ${req.body.volume}`
@@ -83,7 +81,7 @@ export const createChapter = async (req, res) => {
                 }
                 const newChapter = await tx.novelChapter.create({
                     data: {
-                        webNovelId: req.params.webnovelId,
+                        webNovelId: webNovelId,
                         volumeId: volume ? volume.id : newVolume.id,
                         title: req.body.title || `Chapter ${req.body.number}`,
                         number: Number(req.body.number),
@@ -101,9 +99,9 @@ export const createChapter = async (req, res) => {
 }
 
 export const getChapter = async (req, res) => {
-    const { webnovelId, mangaId, chapterId } = req.params;
+    const { webNovelId, mangaId, chapterId } = req.params;
     try {
-        if (webnovelId) {
+        if (webNovelId) {
             const chapter = await prisma.novelChapter.findUnique({
                 where: { id: chapterId },
             });
@@ -130,19 +128,27 @@ export const getChapter = async (req, res) => {
 }
 
 export const getChapterList = async (req, res) => {
-    const { webnovelId, mangaId } = req.params;
-    if (webnovelId) {
+    const { webNovelId, mangaId } = req.params;
+    if (webNovelId) {
         try {
-            const chapterList = await prisma.novelChapter.findMany()
-            return res.status(200).json({ id: webnovelId, chapters: chapterList })
+            const chapterList = await prisma.novelChapter.findMany({
+                where: {
+                    webNovelId
+                }
+            })
+            return res.status(200).json({ id: webNovelId, chapters: chapterList })
         } catch (error) {
             return res.status(500).json({ error: "Failed to retrieve chapters", errorDetails: error.message });
         }
     }
     if (mangaId) {
         try {
-            const chapterList = await prisma.mangaChapter.findMany()
-            return res.status(200).json({ id: webnovelId, chapters: chapterList })
+            const chapterList = await prisma.mangaChapter.findMany({
+                where: {
+                    mangaId
+                }
+            })
+            return res.status(200).json({ id: mangaId, chapters: chapterList })
         } catch (error) {
             return res.status(500).json({ error: "Failed to retrieve chapters", errorDetails: error.message });
         }
@@ -150,8 +156,8 @@ export const getChapterList = async (req, res) => {
 }
 
 export const deleteChapter = async (req, res) => {
-    const { webnovelId, mangaId, chapterId } = req.params;
-    if (webnovelId) {
+    const { webNovelId, mangaId, chapterId } = req.params;
+    if (webNovelId) {
         try {
             const chapter = await prisma.novelChapter.findUnique({ where: { id: chapterId } })
             if (!chapter) {

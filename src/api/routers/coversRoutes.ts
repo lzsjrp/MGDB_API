@@ -1,6 +1,5 @@
 import express from 'express';
 import multer from 'multer';
-import path from 'path';
 import * as coversController from '../controllers/coversController.js';
 
 import { useToken } from '../middlewares/useToken.js';

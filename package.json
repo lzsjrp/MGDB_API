@@ -16,7 +16,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:reset": "prisma migrate reset",
-    "build": "tsup"
+    "build": "tsup",
+    "start": "bun run dist/index.cjs"
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
