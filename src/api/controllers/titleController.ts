@@ -47,7 +47,7 @@ export const getTitle = async (req, res) => {
         if (webnovelId) {
             const webNovel = await prisma.webNovel.findUnique({
                 where: { id: webnovelId },
-                include: { volumes: true, cover: true },
+                include: { volumes: true },
             });
             if (!webNovel) {
                 return res.status(404).json({ error: "Web novel not found" });
@@ -57,7 +57,7 @@ export const getTitle = async (req, res) => {
         if (mangaId) {
             const manga = await prisma.manga.findUnique({
                 where: { id: mangaId },
-                include: { chapters: true, cover: true },
+                include: { chapters: true },
             });
             if (!manga) {
                 return res.status(404).json({ error: "Manga not found" });
