@@ -1,31 +1,44 @@
 import prisma from "../lib/prisma.js";
-import fs from "fs"
 import path from "path"
+import { createClient } from "@supabase/supabase-js"
 
-const projectRoot = process.cwd();
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
 export const uploadCover = async (req, res) => {
     const { titleId } = req.params
     try {
-        if (!req.file) {
+        if (!req.file.buffer) {
             return res.status(400).json({ error: "No image uploaded" });
         }
-        const titleImg = await prisma.titleCover.upsert({
-            where: {
-                titleId
-            },
-            create: {
-                titleId,
-                imageUrl: req.file.filename,
-                addedBy: req.session.userId
-            },
-            update: {
-                titleId,
-                imageUrl: req.file.filename,
-                addedBy: req.session.userId
-            }
+        const fileName = titleId + path.extname(req.file.originalname).toLowerCase();
+        const titleCover = await prisma.$transaction(async (tx) => {
+            const { data, error } = await supabase.storage
+                .from("image-bucket")
+                .upload(fileName, req.file.buffer, {
+                    contentType: req.file.mimetype,
+                    upsert: true
+                })
+            if (error) throw error;
+
+            const { data: image_url } = supabase.storage.from("image-bucket").getPublicUrl(fileName);
+
+            return await tx.titleCover.upsert({
+                where: {
+                    titleId
+                },
+                create: {
+                    titleId,
+                    imageUrl: image_url.publicUrl,
+                    addedBy: req.session.userId
+                },
+                update: {
+                    titleId,
+                    imageUrl: image_url.publicUrl,
+                    addedBy: req.session.userId
+                }
+            })
         })
-        return res.status(201).json({ id: titleId, message: "Cover uploaded successfully", cover: titleImg });
+        return res.status(200).json({ id: titleId, message: "Cover uploaded", cover: titleCover })
     } catch (error) {
         res.status(500).json({ error: "Failed to upload cover", errorDetails: error.message });
     }
@@ -40,14 +53,7 @@ export const getCover = async (req, res) => {
             }
         })
         if (!titleCover) return res.status(400).json({ error: "Cover not found" });
-        const imagePath = path.join(projectRoot, 'covers', titleCover.imageUrl);
-        fs.readFile(imagePath, (err, data) => {
-            if (err) {
-                return res.status(400).json({ error: "Cover not found" });;
-            }
-            res.writeHead(200, { 'Content-Type': 'image/jpeg' });
-            res.end(data);
-        });
+        return res.status(200).json({ id: titleId, cover: titleCover })
     } catch (error) {
         res.status(500).json({ error: "Failed to get cover", errorDetails: error.message });
     }
