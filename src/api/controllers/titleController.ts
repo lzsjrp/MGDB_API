@@ -23,7 +23,7 @@ export const createTitle = async (req, res) => {
             res.status(201).json({ id: newWebNovel.id, message: "Web novel created successfully", webNovel: newWebNovel });
         }
         if (req.body.type === "Manga") {
-            const newWebNovel = await prisma.manga.create({
+            const newManga = await prisma.manga.create({
                 data: {
                     title: req.body.title,
                     author: req.body.author,
@@ -34,7 +34,7 @@ export const createTitle = async (req, res) => {
                     status: req.body.status || "Ongoing",
                 },
             });
-            res.status(201).json({ id: newWebNovel.id, message: "Web novel created successfully", webNovel: newWebNovel });
+            res.status(201).json({ id: newManga.id, message: "Manga created successfully", manga: newManga });
         }
     } catch (error) {
         res.status(500).json({ error: "Failed to create title", errorDetails: error.message });
@@ -147,8 +147,4 @@ export const updateTitle = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: "Failed to update title", errorDetails: error.message });
     }
-}
-
-export const getTitleCover = async (req, res) => {
-
 }

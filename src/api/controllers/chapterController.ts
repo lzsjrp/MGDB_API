@@ -8,15 +8,51 @@ export const createChapter = async (req, res) => {
         if (req.body.type !== "Manga" && req.body.type !== "Light Novel") {
             return res.status(400).json({ error: "Invalid type. Must be 'Manga' or 'Light Novel'" });
         }
+        if (req.body.number < 1) {
+            return res.status(400).json({ error: "Number must be a positive integer" });
+        }
         if (req.body.type === "Manga") {
-            return res.status(400).json({ error: "Not implemented yet" });
+            const existingManga = await prisma.manga.findUnique({
+                where: {
+                    id: req.params.mangaId
+                }
+            })
+            if (!existingManga) {
+                return res.status(404).json({ error: "Manga not found" });
+            }
+            const existingChapter = await prisma.mangaChapter.findFirst({
+                where: {
+                    mangaId: req.params.mangaId,
+                    number: Number(req.body.number),
+                },
+            });
+            if (existingChapter) {
+                return res.status(409).json({ error: "Chapter number already exists" });
+            }
+            await prisma.$transaction(async (tx) => {
+                const newChapter = await tx.mangaChapter.create({
+                    data: {
+                        mangaId: req.params.mangaId,
+                        title: req.body.title || `Chapter ${req.body.number}`,
+                        number: Number(req.body.number),
+                        pagesCount: 0,
+                        addedBy: req.session.userId,
+                    },
+                });
+                return res.status(201).json({ id: newChapter.id, message: "Chapter created successfully", chapter: newChapter });
+            })
         }
         if (req.body.type === "Light Novel") {
             if (!req.body.volume || req.body.volume < 1) {
                 return res.status(400).json({ error: "Volume must be a positive integer" });
             }
-            if (req.body.number < 1) {
-                return res.status(400).json({ error: "Number must be a positive integer" });
+            const existingWebNovel = await prisma.webNovel.findUnique({
+                where: {
+                    id: req.params.webNovelId
+                }
+            })
+            if (!existingWebNovel) {
+                return res.status(404).json({ error: "Web novel not found" });
             }
             const existingChapter = await prisma.novelChapter.findFirst({
                 where: {
