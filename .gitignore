@@ -28,4 +28,5 @@ lerna-debug.log*
 .DS_Store
 .vercel
 .env.development
-/covers
+/covers/**
+!/covers/.gitignore
