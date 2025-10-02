@@ -53,8 +53,8 @@ model Manga {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  chapters   MangaChapter[]
-  MangaCover MangaCover[]
+  chapters MangaChapter[]
+  cover    MangaCover[]
 }
 
 model MangaChapter {
@@ -103,8 +103,8 @@ model WebNovel {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  chapter    NovelVolume[]
-  NovelCover NovelCover[]
+  volumes NovelVolume[]
+  cover   NovelCover[]
 }
 
 model NovelVolume {

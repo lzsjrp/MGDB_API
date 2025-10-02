@@ -1,15 +1,15 @@
 import express from 'express';
-import * as webnovelController from '../controllers/webNovelController.js';
+import * as titleController from '../controllers/titleController.js';
 import * as chapterController from '../controllers/chapterController.js';
 
 import { useToken } from '../middlewares/useToken.js';
 
 export const router = express.Router();
 
-router.post('/', useToken, webnovelController.createWebNovel);
-router.get('/:webnovelId', webnovelController.getWebNovel);
-router.delete('/:webnovelId', useToken, webnovelController.deleteWebNovel);
-router.patch('/:webnovelId', useToken, webnovelController.updateWebNovel);
+router.post('/', useToken, titleController.createTitle);
+router.get('/:webnovelId', titleController.getTitle);
+router.delete('/:webnovelId', useToken, titleController.deleteTitle);
+router.patch('/:webnovelId', useToken, titleController.updateTitle);
 
 router.post('/:webnovelId/chapters', useToken, chapterController.createChapter);
 router.get('/:webnovelId/chapters', chapterController.getChapterList);
