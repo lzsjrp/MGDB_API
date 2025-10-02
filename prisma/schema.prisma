@@ -54,7 +54,6 @@ model Manga {
   updatedAt DateTime @updatedAt
 
   chapters MangaChapter[]
-  cover    MangaCover[]
 }
 
 model MangaChapter {
@@ -104,7 +103,6 @@ model WebNovel {
   updatedAt DateTime @updatedAt
 
   volumes NovelVolume[]
-  cover   NovelCover[]
 }
 
 model NovelVolume {
@@ -141,30 +139,12 @@ model NovelChapter {
   @@index([volumeId])
 }
 
-model MangaCover {
+model TitleCover {
   id       String @id @default(uuid())
-  mangaId  String
+  titleId  String @unique
   imageUrl String
   addedBy  String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  manga Manga @relation(fields: [mangaId], references: [id], onDelete: Cascade)
-
-  @@index([mangaId])
-}
-
-model NovelCover {
-  id         String @id @default(uuid())
-  webNovelId String
-  imageUrl   String
-  addedBy    String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  webNovel WebNovel @relation(fields: [webNovelId], references: [id], onDelete: Cascade)
-
-  @@index([webNovelId])
 }
