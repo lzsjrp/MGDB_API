@@ -1,4 +1,6 @@
 import prisma from "../lib/prisma.js";
+import path from "path"
+import * as uuid from "uuid"
 
 import { createClient } from "@supabase/supabase-js"
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
@@ -188,6 +190,80 @@ export const deleteChapter = async (req, res) => {
         }
     }
 }
+
+export const chapterPageUpload = async (req, res) => {
+    const { mangaId, chapterId } = req.params;
+    if (!mangaId) return res.status(400).json({ error: "Chapter pages only avaliable for 'Manga'" });
+    try {
+        const pageNumber = parseInt(req.body.pageNumber);
+        if (!pageNumber) {
+            return res.status(400).json({ error: "Page number not specified" });
+        }
+        if (!req.file.buffer) {
+            return res.status(400).json({ error: "No image provided" });
+        }
+        const existingPage = await prisma.mangaChapterPage.findFirst({
+            where: {
+                chapterId,
+                pageNumber
+            }
+        })
+        if (existingPage) {
+            const fileName = existingPage.id + path.extname(req.file.originalname).toLowerCase();
+            const { data, error } = await supabase.storage
+                .from("image-bucket")
+                .upload(fileName, req.file.buffer, {
+                    contentType: req.file.mimetype,
+                    upsert: true
+                })
+            if (error) throw error;
+            const { data: image_url } = supabase.storage.from("image-bucket").getPublicUrl(fileName);
+            const updatedPage = await prisma.mangaChapterPage.update({
+                where: {
+                    id: existingPage.id,
+                    pageNumber
+                },
+                data: {
+                    imageUrl: image_url.publicUrl,
+                    addedBy: req.session.userId,
+                },
+            });
+            return res.status(200).json({ chapterId, pageId: existingPage.id, message: "Page updated successfully", page: updatedPage });
+        }
+        const pageId = uuid.v4()
+        const fileName = pageId + path.extname(req.file.originalname).toLowerCase();
+        const { data, error } = await supabase.storage
+            .from("image-bucket")
+            .upload(fileName, req.file.buffer, {
+                contentType: req.file.mimetype,
+                upsert: true
+            })
+        if (error) throw error;
+        const { data: image_url } = supabase.storage.from("image-bucket").getPublicUrl(fileName);
+        const newPage = await prisma.mangaChapterPage.create({
+            data: {
+                id: pageId,
+                chapterId,
+                pageNumber,
+                imageUrl: image_url.publicUrl,
+                addedBy: req.session.userId,
+            },
+        });
+        const pageCount = await prisma.mangaChapterPage.count({
+            where: { chapterId },
+        });
+
+        await prisma.mangaChapter.update({
+            where: { id: chapterId },
+            data: { pagesCount: pageCount },
+        });
+        res.status(201).json({ chapterId, pageId, message: "Page uploaded successfully", page: newPage });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to upload chapter page", errorDetails: error.message });
+    }
+};
+
+
 
 export const updateChapter = async (req, res) => {
     return res.status(400).json({ error: "Not implemented yet" });

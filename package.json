@@ -22,10 +22,12 @@
   "dependencies": {
     "@prisma/client": "^6.16.2",
     "@supabase/supabase-js": "^2.58.0",
+    "@types/uuid": "^11.0.0",
     "bcrypt": "^6.0.0",
     "express": "5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/bun": "^1.2.22",
