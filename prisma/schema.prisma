@@ -40,12 +40,17 @@ model Session {
   @@index([userId])
 }
 
-model Manga {
-  id          String   @id @default(uuid())
+enum TitleType {
+  MANGA
+  WEB_NOVEL
+}
+
+model Book {
+  id          String    @id @default(uuid())
   title       String
   author      String
   description String?
-  type        String
+  type        TitleType
   status      String
   addedBy     String
   genre       String[]
@@ -53,29 +58,49 @@ model Manga {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  chapters MangaChapter[]
+  volumes BookVolume[]
+  cover   BookCover?
+  images  ImageChapter[]
 }
 
-model MangaChapter {
-  id         String @id @default(uuid())
-  mangaId    String
-  title      String
-  number     Int
-  pagesCount Int
-  addedBy    String
+model BookVolume {
+  id      String @id @default(uuid())
+  bookId  String
+  title   String
+  number  Int
+  addedBy String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  manga Manga @relation(fields: [mangaId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
-  pages MangaChapterPage[]
+  chapters BookChapter[]
 
-  @@index([mangaId])
+  @@index([bookId])
 }
 
-model MangaChapterPage {
+model BookChapter {
+  id       String  @id @default(uuid())
+  bookId   String
+  volumeId String
+  title    String
+  number   Int
+  content  String?
+  addedBy  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  volume BookVolume     @relation(fields: [volumeId], references: [id], onDelete: Cascade)
+  images ImageChapter[]
+
+  @@index([volumeId])
+}
+
+model ImageChapter {
   id         String @id @default(uuid())
+  bookId     String
   chapterId  String
   pageNumber Int
   imageUrl   String
@@ -84,67 +109,22 @@ model MangaChapterPage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  chapter MangaChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapter BookChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  book    Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   @@index([chapterId])
 }
 
-model WebNovel {
-  id          String   @id @default(uuid())
-  title       String
-  author      String
-  description String?
-  type        String
-  status      String
-  addedBy     String
-  genre       String[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  volumes NovelVolume[]
-}
-
-model NovelVolume {
-  id         String @id @default(uuid())
-  webNovelId String
-  title      String
-  number     Int
-  addedBy    String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  webNovel WebNovel @relation(fields: [webNovelId], references: [id], onDelete: Cascade)
-
-  chapters NovelChapter[]
-
-  @@index([webNovelId])
-}
-
-model NovelChapter {
-  id         String @id @default(uuid())
-  webNovelId String
-  volumeId   String
-  title      String
-  number     Int
-  content    String
-  addedBy    String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  volume NovelVolume @relation(fields: [volumeId], references: [id], onDelete: Cascade)
-
-  @@index([volumeId])
-}
-
-model TitleCover {
+model BookCover {
   id       String @id @default(uuid())
-  titleId  String @unique
+  bookId   String @unique
   imageUrl String
   addedBy  String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([bookId])
 }

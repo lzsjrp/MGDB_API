@@ -8,15 +8,10 @@ router.get('/', (_req, res) => {
 
 import userRoutes from './routers/userRoutes.js'
 import sessionRoutes from './routers/sessionRoutes.js'
-import mangaRoutes from './routers/mangaRoutes.js'
-import webNovelRoutes from './routers/webNovelRoutes.js'
-import coversRoutes from './routers/coversRoutes.js'
+import titleRoutes from './routers/titleRoutes.js'
 
 router.use('/users', userRoutes);
 router.use('/session', sessionRoutes);
-router.use('/manga', mangaRoutes);
-router.use('/webnovel', webNovelRoutes);
-router.use('/covers', coversRoutes);
-
+router.use('/title', titleRoutes);
 
 export default router;

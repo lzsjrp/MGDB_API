@@ -22,17 +22,17 @@ export const uploadCover = async (req, res) => {
 
             const { data: image_url } = supabase.storage.from("image-bucket").getPublicUrl(fileName);
 
-            return await tx.titleCover.upsert({
+            return await tx.bookCover.upsert({
                 where: {
-                    titleId
+                    bookId: titleId
                 },
                 create: {
-                    titleId,
+                    bookId: titleId,
                     imageUrl: image_url.publicUrl,
                     addedBy: req.session.userId
                 },
                 update: {
-                    titleId,
+                    bookId: titleId,
                     imageUrl: image_url.publicUrl,
                     addedBy: req.session.userId
                 }
@@ -47,9 +47,9 @@ export const uploadCover = async (req, res) => {
 export const getCover = async (req, res) => {
     const { titleId } = req.params
     try {
-        const titleCover = await prisma.titleCover.findFirst({
+        const titleCover = await prisma.bookCover.findFirst({
             where: {
-                titleId
+                bookId: titleId
             }
         })
         if (!titleCover) return res.status(400).json({ error: "Cover not found" });
