@@ -79,7 +79,7 @@ export const updateTitle = async (req, res) => {
                 status: req.body.status || book.status,
             },
         });
-        res.status(200).json({ id: book.id, message: "Title updated successfully", book });
+        res.status(200).json({ id: book.id, message: "Title updated successfully", book: updatedBook });
     } catch (error) {
         res.status(500).json({ error: "Failed to update title", errorDetails: error.message });
     }

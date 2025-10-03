@@ -57,5 +57,4 @@ export const getCover = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: "Failed to get cover", errorDetails: error.message });
     }
-
 }
