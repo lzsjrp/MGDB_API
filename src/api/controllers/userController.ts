@@ -25,6 +25,23 @@ export const createUser = async (req, res) => {
     }
 };
 
+export const getSessionUser = async (req, res) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: req.session.userId },
+            select: { id: true, email: true, name: true }
+        });
+        if (!user) {
+            return res.status(500).json({ error: "User not found" });
+        }
+        return res.status(200).json(user);
+    }
+    catch (error) {
+        console.error("Error retrieving user:", error);
+        return res.status(500).json({ error: "Failed to fetch user" });
+    }
+}
+
 export const getUser = async (req, res) => {
     const { id } = req.params || {};
     if (!id) {
@@ -103,7 +120,7 @@ export const updateUser = async (req, res) => {
             }
             const updatedUser = await tx.user.update({
                 where: { id: user.id },
-                data: updateData,  
+                data: updateData,
                 select: { id: true, email: true, name: true }
             });
             return res.status(200).json(updatedUser);
