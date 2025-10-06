@@ -10,6 +10,7 @@ import { useToken } from '../middlewares/useToken.js';
 export const router = express.Router();
 
 router.post('/', useToken, titleController.createTitle);
+router.get('/', titleController.getTitleList);
 router.get('/:titleId', titleController.getTitle);
 router.delete('/:titleId', useToken, titleController.deleteTitle);
 router.patch('/:titleId', useToken, titleController.updateTitle);
