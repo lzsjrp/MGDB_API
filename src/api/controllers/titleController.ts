@@ -57,7 +57,7 @@ export const getTitleList = async (req, res) => {
 				: {},
 			skip: (pageNumber - 1) * pageSize,
 			take: pageSize,
-			include: { volumes: true },
+			include: { volumes: true, cover: true },
 			orderBy: { title: 'asc' },
 		});
 
