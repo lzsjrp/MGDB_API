@@ -30,7 +30,7 @@ export const getTitle = async (req, res) => {
 	try {
 		const book = await prisma.book.findUnique({
 			where: { id: titleId },
-			include: { volumes: true },
+			include: { volumes: true, cover: true },
 		});
 		if (!book) {
 			return res.status(404).json({ error: "Title not found" });
@@ -67,10 +67,13 @@ export const getTitleList = async (req, res) => {
 				: {}
 		});
 
+		const totalPages = Math.ceil(total / pageSize);
+
 		return res.status(200).json({
 			page: pageNumber,
 			pageSize,
 			total,
+			totalPages,
 			data: books,
 		});
 	} catch (error) {
