@@ -76,7 +76,7 @@ export const getChapter = async (req, res) => {
         }
         const chapter = await prisma.bookChapter.findUnique({
             where: { id: chapterId, bookId: titleId },
-            include: { images: true }
+            include: { images: existingBook.type === "WEB_NOVEL" ? false : true }
         });
         if (!chapter) {
             return res.status(404).json({ error: "Chapter not found" });
@@ -97,7 +97,17 @@ export const getChapterList = async (req, res) => {
             return res.status(404).json({ error: "Title not found" });
         }
         const chapters = await prisma.bookChapter.findMany({
-            where: { bookId: titleId }
+            where: { bookId: titleId },
+            select: {
+                id: true,
+                bookId: true,
+                volumeId: true,
+                title: true,
+                number: true,
+                addedBy: true,
+                createdAt: true,
+                updatedAt: true,
+            }
         })
         return res.status(200).json({ bookId: titleId, chapters })
     } catch (error) {
