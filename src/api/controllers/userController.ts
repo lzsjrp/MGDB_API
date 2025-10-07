@@ -29,7 +29,7 @@ export const getSessionUser = async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
             where: { id: req.session.userId },
-            select: { id: true, email: true, name: true }
+            select: { id: true, email: true, name: true, permissions: true }
         });
         if (!user) {
             return res.status(500).json({ error: "User not found" });
@@ -50,7 +50,7 @@ export const getUser = async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
             where: id.includes('@') ? { email: id } : { id },
-            select: { id: true, email: true, name: true }
+            select: { id: true, email: true, name: true, permissions: true }
         });
         if (!user) {
             return res.status(404).json({ error: "User not found" });
@@ -121,7 +121,7 @@ export const updateUser = async (req, res) => {
             const updatedUser = await tx.user.update({
                 where: { id: user.id },
                 data: updateData,
-                select: { id: true, email: true, name: true }
+                select: { id: true, email: true, name: true, permissions: true }
             });
             return res.status(200).json(updatedUser);
         }
