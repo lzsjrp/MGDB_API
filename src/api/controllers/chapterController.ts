@@ -29,23 +29,22 @@ export const createChapter = async (req, res) => {
             return res.status(409).json({ error: "Chapter already exists" });
         }
         await prisma.$transaction(async (tx) => {
-            const existingVolume = await prisma.bookVolume.findFirst({
-                where: {
-                    bookId: titleId,
-                    number: Number(req.body.volume),
-                }
-            })
             const updatedVolume = await tx.bookVolume.upsert({
-                where: { id: existingVolume.id },
+                where: {
+                    bookId_number: {
+                        bookId: titleId,
+                        number: Number(req.body.volume),
+                    }
+                },
                 create: {
                     bookId: titleId,
                     number: Number(req.body.volume),
                     addedBy: req.session.userId,
-                    title: req.body.volumeTitle || `Volume ${req.body.volume}`
+                    title: req.body.volumeTitle || `Volume ${req.body.volume}`,
                 },
                 update: {
                     addedBy: req.session.userId,
-                    title: req.body.volumeTitle || `Volume ${req.body.volume}`
+                    title: req.body.volumeTitle || `Volume ${req.body.volume}`,
                 },
             });
             const newChapter = await tx.bookChapter.create({

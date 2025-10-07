@@ -78,6 +78,7 @@ model BookVolume {
 
   chapters BookChapter[]
 
+  @@unique([bookId, number])
   @@index([bookId])
 }
 
