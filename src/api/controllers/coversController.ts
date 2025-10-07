@@ -40,7 +40,7 @@ export const uploadCover = async (req, res) => {
         })
         return res.status(200).json({ id: titleCover.id, message: "Cover uploaded", cover: titleCover })
     } catch (error) {
-        res.status(500).json({ error: "Failed to upload cover", errorDetails: error.message });
+        res.status(500).json({ error: "Failed to upload cover", errorMessage: error.message, errorObj: error });
     }
 }
 
@@ -55,6 +55,6 @@ export const getCover = async (req, res) => {
         if (!titleCover) return res.status(400).json({ error: "Cover not found" });
         return res.status(200).json({ id: titleCover.id, cover: titleCover })
     } catch (error) {
-        res.status(500).json({ error: "Failed to get cover", errorDetails: error.message });
+        res.status(500).json({ error: "Failed to get cover", errorMessage: error.message, errorObj: error });
     }
 }

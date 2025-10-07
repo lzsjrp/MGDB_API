@@ -28,8 +28,7 @@ export const createSession = async (req, res) => {
         });
         return res.status(200).json({ session });
     } catch (error) {
-        console.error("Error creating session:", error);
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error", errorMessage: error.message, errorObj: error  });
     }
 };
 

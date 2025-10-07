@@ -62,7 +62,7 @@ export const createChapter = async (req, res) => {
         })
     } catch (error) {
         console.log(error)
-        res.status(500).json({ error: "Failed to create chapter", errorDetails: error.message });
+        res.status(500).json({ error: "Failed to create chapter", errorDetails: error.message, errorObj: error });
     }
 }
 
@@ -84,7 +84,7 @@ export const getChapter = async (req, res) => {
         }
         res.status(200).json({ id: chapter.id, chapter });
     } catch (error) {
-        res.status(500).json({ error: "Failed to retrieve chapter", errorDetails: error.message });
+        res.status(500).json({ error: "Failed to retrieve chapter", errorDetails: error.message, errorObj: error });
     }
 }
 
@@ -102,7 +102,7 @@ export const getChapterList = async (req, res) => {
         })
         return res.status(200).json({ bookId: titleId, chapters })
     } catch (error) {
-        res.status(500).json({ error: "Failed to retrieve chapters list", errorDetails: error.message });
+        res.status(500).json({ error: "Failed to retrieve chapters list", errorDetails: error.message, errorObj: error });
     }
 }
 
@@ -125,7 +125,7 @@ export const deleteChapter = async (req, res) => {
         await prisma.bookChapter.delete({ where: { id: chapterId, bookId: titleId } });
         res.status(200).json({ id: chapterId, message: "Chapter deleted successfully", chapter });
     } catch (error) {
-        res.status(500).json({ error: "Failed to delete chapter", errorDetails: error.message });
+        res.status(500).json({ error: "Failed to delete chapter", errorDetails: error.message, errorObj: error });
     }
 }
 
@@ -186,7 +186,7 @@ export const chapterPageUpload = async (req, res) => {
 
         res.status(201).json({ chapterId, pageId, message: "Page uploaded successfully", page: newPage });
     } catch (error) {
-        res.status(500).json({ error: "Failed to upload chapter page", errorDetails: error.message });
+        res.status(500).json({ error: "Failed to upload chapter page", errorDetails: error.message, errorObj: error });
     }
 };
 

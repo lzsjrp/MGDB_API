@@ -20,8 +20,7 @@ export const createUser = async (req, res) => {
         })
     }
     catch (error) {
-        console.error("Error creating user:", error);
-        return res.status(500).json({ error: "Failed to register user" });
+        return res.status(500).json({ error: "Failed to register user", errorMessage: error.message, errorObj: error });
     }
 };
 
@@ -37,8 +36,7 @@ export const getSessionUser = async (req, res) => {
         return res.status(200).json(user);
     }
     catch (error) {
-        console.error("Error retrieving user:", error);
-        return res.status(500).json({ error: "Failed to fetch user" });
+        return res.status(500).json({ error: "Failed to fetch user", errorMessage: error.message, errorObj: error });
     }
 }
 
@@ -87,7 +85,7 @@ export const deleteUser = async (req, res) => {
     }
     catch (error) {
         console.error("Error deleting user:", error);
-        return res.status(500).json({ error: "Failed to delete user" });
+        return res.status(500).json({ error: "Failed to delete user", errorMessage: error.message, errorObj: error  });
     }
 };
 
@@ -129,6 +127,6 @@ export const updateUser = async (req, res) => {
     }
     catch (error) {
         console.error("Error updating user:", error);
-        return res.status(500).json({ error: "Failed to update user" });
+        return res.status(500).json({ error: "Failed to update user", errorMessage: error.message, errorObj: error  });
     }
 };
