@@ -183,13 +183,13 @@ export const chapterPageUpload = async (req, res) => {
                 chapterId,
                 pageNumber,
                 imageUrl: image_url.publicUrl,
-                addedBy: res.session.userId,
+                addedBy: req.session.userId,
             },
             update: {
                 chapterId,
                 pageNumber,
                 imageUrl: image_url.publicUrl,
-                addedBy: res.session.userId,
+                addedBy: req.session.userId,
             },
         });
 
