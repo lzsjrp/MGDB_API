@@ -176,7 +176,7 @@ export const chapterPageUpload = async (req, res) => {
         if (error) throw error;
         const { data: image_url } = supabase.storage.from("image-bucket").getPublicUrl(filename);
         const newPage = await prisma.imageChapter.upsert({
-            where: { id: existingPage.id || pageId },
+            where: { id: existingPage?.id ?? pageId },
             create: {
                 id: pageId,
                 bookId: existingBook.id,
