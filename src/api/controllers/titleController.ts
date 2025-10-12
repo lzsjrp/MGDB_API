@@ -259,3 +259,20 @@ export const syncFavorites = async (req, res) => {
 		res.status(500).json({ error: 'Failed to sync favorites', errorDetails: error.message });
 	}
 };
+
+export const getFavorites = async (req, res) => {
+	try {
+		const favorites = await prisma.userFavorites.findMany({
+			where: { userId: req.session.userId },
+			select: {
+				bookId: true,
+			},
+		});
+
+		const favoriteBookIds = favorites.map(fav => fav.bookId);
+
+		res.status(200).json({ favorites: favoriteBookIds });
+	} catch (error) {
+		res.status(500).json({ error: 'Failed to fetch favorites', errorDetails: error.message });
+	}
+};
