@@ -11,9 +11,13 @@ export const router = express.Router();
 
 router.post('/', useToken, titleController.createTitle);
 router.get('/', titleController.getTitleList);
+
 router.get('/:titleId', titleController.getTitle);
 router.delete('/:titleId', useToken, titleController.deleteTitle);
 router.patch('/:titleId', useToken, titleController.updateTitle);
+
+router.post('/favorites/sync', useToken, titleController.syncFavorites);
+router.post('/:titleId/favorite', useToken, titleController.addFavorite);
 
 router.get("/:titleId/cover", coversController.getCover)
 router.post("/:titleId/cover", useToken, multer.single("image"), coversController.uploadCover)

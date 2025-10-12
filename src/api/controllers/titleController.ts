@@ -195,3 +195,67 @@ export const updateTitle = async (req, res) => {
 		res.status(500).json({ error: "Failed to update title", errorDetails: error.message });
 	}
 }
+
+export const addFavorite = async (req, res) => {
+	const { titleId } = req.body;
+	try {
+		const existing = await prisma.userFavorites.findUnique({
+			where: {
+				userId_bookId: {
+					userId: req.session.userId,
+					bookId: titleId,
+				}
+			}
+		});
+		if (existing) {
+			return res.status(409).json({ error: 'Book already favorited by this user' });
+		}
+		await prisma.userFavorites.create({
+			data: {
+				userId: req.session.userId,
+				bookId: titleId,
+			}
+		});
+		res.status(201).json({ message: 'Favorite added successfully' });
+	} catch (error) {
+		res.status(500).json({ error: 'Failed to add favorite', errorDetails: error.message });
+	}
+};
+
+export const syncFavorites = async (req, res) => {
+	const { booksIds } = req.body;
+
+	if (!Array.isArray(booksIds) || booksIds.length === 0) {
+		return res.status(400).json({ error: 'booksIds must be a non-empty array' });
+	}
+
+	try {
+		const existingFavorites = await prisma.userFavorites.findMany({
+			where: {
+				userId: req.session.userId,
+				bookId: { in: booksIds },
+			},
+			select: { bookId: true },
+		});
+
+		const existingBookIds = new Set(existingFavorites.map(fav => fav.bookId));
+
+		const booksToAdd = booksIds.filter(id => !existingBookIds.has(id));
+
+		const createdFavorites = [];
+		for (const bookId of booksToAdd) {
+			const created = await prisma.userFavorites.create({
+				data: { userId: req.session.userId, bookId },
+			});
+			createdFavorites.push(created);
+		}
+
+		res.status(200).json({
+			message: 'Favorites synced successfully',
+			added: booksToAdd.length,
+			alreadyExist: existingBookIds.size,
+		});
+	} catch (error) {
+		res.status(500).json({ error: 'Failed to sync favorites', errorDetails: error.message });
+	}
+};

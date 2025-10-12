@@ -24,7 +24,20 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  sessions Session[]
+  sessions  Session[]
+  favorites UserFavorites[]
+}
+
+model UserFavorites {
+  userId String
+  bookId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@id([userId, bookId])
+  @@index([userId])
+  @@index([bookId])
 }
 
 model Session {
@@ -59,9 +72,10 @@ model Book {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  volumes BookVolume[]
-  cover   BookCover?
-  images  ImageChapter[]
+  volumes     BookVolume[]
+  cover       BookCover?
+  images      ImageChapter[]
+  favoritedBy UserFavorites[]
 }
 
 model BookVolume {
