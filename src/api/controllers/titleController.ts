@@ -51,9 +51,18 @@ export const getTitleList = async (req, res) => {
 		return res.status(400).json({ error: 'Page number is invalid' });
 	}
 
-	const orderByClause = sortBy === 'title'
-		? { title: 'asc' } as const
-		: { createdAt: 'desc' } as const
+	let orderByClause;
+
+	switch (sortBy) {
+		case 'title':
+			orderByClause = { title: 'asc' };
+			break;
+		case 'updated':
+			orderByClause = { updatedAt: 'desc' };
+			break;
+		default:
+			orderByClause = { createdAt: 'desc' };
+	}
 
 	const filters = {
 		AND: [],
