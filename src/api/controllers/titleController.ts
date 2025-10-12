@@ -42,7 +42,8 @@ export const getTitle = async (req, res) => {
 }
 
 export const getTitleList = async (req, res) => {
-	const { page = '1', search } = req.query;
+	const { page = '1', sortBy = 'recent', search, type, author, genres, addedAfter, addedBefore } = req.query;
+
 	const pageNumber = parseInt(page, 10);
 	const pageSize = 10;
 
@@ -50,22 +51,72 @@ export const getTitleList = async (req, res) => {
 		return res.status(400).json({ error: 'Page number is invalid' });
 	}
 
+	const orderByClause = sortBy === 'title'
+		? { title: 'asc' } as const
+		: { createdAt: 'desc' } as const
+
+	const filters = {
+		AND: [],
+	};
+
+	const filterDate = {} as { gte?: Date; lte?: Date };
+
+	if (addedAfter) {
+		const afterDate = new Date(addedAfter);
+		if (!isNaN(afterDate.getTime())) filterDate.gte = afterDate;
+	}
+	if (addedBefore) {
+		const beforeDate = new Date(addedBefore);
+		if (!isNaN(beforeDate.getTime())) filterDate.lte = beforeDate;
+	}
+	if (Object.keys(filterDate).length > 0) {
+		filters.AND.push({ createdAt: filterDate });
+	}
+
+	if (Object.keys(filterDate).length > 0) {
+		filters.AND.push({ createdAt: filterDate });
+	}
+
+	if (search) {
+		filters.AND.push({ title: { contains: search, mode: 'insensitive' } });
+	}
+
+	if (type) {
+		filters.AND.push({ type: type });
+	}
+
+	if (author) {
+		filters.AND.push({ author: { contains: author, mode: 'insensitive' } });
+	}
+
+	if (genres) {
+		let genresArray = [];
+		if (typeof genres === 'string') {
+			genresArray = genres.split(',').map(g => g.trim());
+		} else if (Array.isArray(genres)) {
+			genresArray = genres;
+		}
+		if (genresArray.length > 0) {
+			filters.AND.push({
+				genre: {
+					hasSome: genresArray,
+				},
+			});
+		}
+	}
+
+	const whereFilter = filters.AND.length > 0 ? { AND: filters.AND } : {};
+
 	try {
 		const books = await prisma.book.findMany({
-			where: search
-				? { title: { contains: search, mode: 'insensitive' } }
-				: {},
+			where: whereFilter,
 			skip: (pageNumber - 1) * pageSize,
 			take: pageSize,
 			include: { volumes: true, cover: true },
-			orderBy: { title: 'asc' },
+			orderBy: orderByClause,
 		});
 
-		const total = await prisma.book.count({
-			where: search
-				? { title: { contains: search, mode: 'insensitive' } }
-				: {}
-		});
+		const total = await prisma.book.count({ where: whereFilter });
 
 		const totalPages = Math.ceil(total / pageSize);
 
