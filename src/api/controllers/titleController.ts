@@ -27,10 +27,20 @@ export const createTitle = async (req, res) => {
 
 export const getTitle = async (req, res) => {
 	const { titleId } = req.params;
+	const { include = '', exclude = '' } = req.query;
+
+	const includes = include.split(',').map((s: string) => s.trim().toLowerCase());
+	const excludes = exclude.split(',').map((s: string) => s.trim().toLowerCase());
+
+	const includeObject = {
+		cover: !excludes.includes('cover'),
+		volumes: includes.includes('volumes') && !excludes.includes('volumes'),
+	};
+
 	try {
 		const book = await prisma.book.findUnique({
 			where: { id: titleId },
-			include: { volumes: true, cover: true },
+			include: includeObject,
 		});
 		if (!book) {
 			return res.status(404).json({ error: "Title not found" });
