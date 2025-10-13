@@ -26,7 +26,8 @@ export const createSession = async (req, res) => {
                 expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             },
         });
-        let sessionWithUser = { ...session, user }
+        const { password: _, createdAt: __, updatedAt: ___, ...safeUser } = user;
+        let sessionWithUser = { ...session, user: safeUser };
         return res.status(200).json({ sessionWithUser });
     } catch (error) {
         return res.status(500).json({ error: "Internal server error", errorMessage: error.message, errorObj: error  });
