@@ -258,12 +258,20 @@ export const removeFavorite = async (req, res) => {
 
 export const syncFavorites = async (req, res) => {
   const { booksIds } = req.body;
-
-  if (!Array.isArray(booksIds) || booksIds.length === 0) {
-    return res.status(400).json({ error: 'booksIds must be a non-empty array' });
+  if (!Array.isArray(booksIds)) {
+    return res.status(400).json({ error: 'booksIds must be an array' });
   }
 
   try {
+    await prisma.userFavorites.deleteMany({
+      where: {
+        userId: req.session.userId,
+        NOT: {
+          bookId: { in: booksIds },
+        },
+      },
+    });
+
     const existingFavorites = await prisma.userFavorites.findMany({
       where: {
         userId: req.session.userId,
@@ -273,22 +281,24 @@ export const syncFavorites = async (req, res) => {
     });
 
     const existingBookIds = new Set(existingFavorites.map(fav => fav.bookId));
-
     const booksToAdd = booksIds.filter(id => !existingBookIds.has(id));
 
-    const createdFavorites = [];
     for (const bookId of booksToAdd) {
-      const created = await prisma.userFavorites.create({
+      await prisma.userFavorites.create({
         data: { userId: req.session.userId, bookId },
       });
-      createdFavorites.push(created);
     }
 
-    res.status(200).json({
-      message: 'Favorites synced successfully',
-      added: booksToAdd.length,
-      alreadyExist: existingBookIds.size,
+    const updatedFavorites = await prisma.userFavorites.findMany({
+      where: { userId: req.session.userId },
+      select: { bookId: true },
     });
+
+    return res.status(200).json({
+      message: 'Favorites synced successfully',
+      favorites: updatedFavorites.map(f => f.bookId),
+    });
+
   } catch (error) {
     res.status(500).json({ error: 'Failed to sync favorites', errorDetails: error.message });
   }
