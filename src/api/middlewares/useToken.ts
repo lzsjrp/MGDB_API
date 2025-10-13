@@ -18,7 +18,7 @@ export const useToken = async (req, res, next) => {
         }
         const user = await prisma.user.findUnique({
             where: { id: session.userId },
-            select: { id: true, email: true, name: true },
+            select: { id: true, email: true, name: true, permissions: true },
         });
         if (!user) {
             return res.status(401).json({ error: "Invalid session" });
