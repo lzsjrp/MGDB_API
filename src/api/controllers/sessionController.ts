@@ -28,7 +28,7 @@ export const createSession = async (req, res) => {
         });
         const { password: _, createdAt: __, updatedAt: ___, ...safeUser } = user;
         let sessionWithUser = { ...session, user: safeUser };
-        return res.status(200).json({ sessionWithUser });
+        return res.status(200).json({ session: sessionWithUser });
     } catch (error) {
         return res.status(500).json({ error: "Internal server error", errorMessage: error.message, errorObj: error  });
     }
