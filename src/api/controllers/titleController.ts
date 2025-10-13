@@ -197,7 +197,7 @@ export const updateTitle = async (req, res) => {
 }
 
 export const addFavorite = async (req, res) => {
-  const { titleId } = req.body;
+  const { titleId } = req.params;
   try {
     const existing = await prisma.userFavorites.findUnique({
       where: {
@@ -223,7 +223,7 @@ export const addFavorite = async (req, res) => {
 };
 
 export const removeFavorite = async (req, res) => {
-  const { titleId } = req.body;
+  const { titleId } = req.params;
 
   try {
     const existing = await prisma.userFavorites.findUnique({
