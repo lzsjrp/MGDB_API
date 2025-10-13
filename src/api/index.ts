@@ -9,9 +9,11 @@ router.get('/', (_req, res) => {
 import userRoutes from './routers/userRoutes.js'
 import sessionRoutes from './routers/sessionRoutes.js'
 import titleRoutes from './routers/titleRoutes.js'
+import favoritesRoutes from './routers/favoritesRoutes.js';
 
 router.use('/users', userRoutes);
 router.use('/session', sessionRoutes);
 router.use('/title', titleRoutes);
+router.use('/favorites', favoritesRoutes);
 
 export default router;
