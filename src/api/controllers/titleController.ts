@@ -100,7 +100,7 @@ export const getTitleList = async (req, res) => {
     filters.AND.push({ title: { contains: search, mode: 'insensitive' } });
   }
 
-  if (type) {
+  if (type && (type === 'MANGA' || type === 'WEB_NOVEL')) {
     filters.AND.push({ type: type });
   }
 
