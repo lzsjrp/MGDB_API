@@ -257,9 +257,14 @@ export const removeFavorite = async (req, res) => {
 
 
 export const syncFavorites = async (req, res) => {
-  const { booksIds } = req.body;
-  if (!Array.isArray(booksIds)) {
-    return res.status(400).json({ error: 'booksIds must be an array' });
+  let { booksIds } = req.body;
+
+  if (typeof booksIds === "string") {
+    booksIds = booksIds.split(",").map((id) => id.trim()).filter((id) => id.length > 0);
+  }
+
+  if (!Array.isArray(booksIds) || booksIds.some((id) => typeof id !== "string")) {
+    return res.status(400).json({ error: "booksIds must be an array of strings" });
   }
 
   try {
@@ -280,10 +285,20 @@ export const syncFavorites = async (req, res) => {
       select: { bookId: true },
     });
 
-    const existingBookIds = new Set(existingFavorites.map(fav => fav.bookId));
-    const booksToAdd = booksIds.filter(id => !existingBookIds.has(id));
+    const existingBookIds = new Set(existingFavorites.map((fav) => fav.bookId));
+    const booksToAdd = booksIds.filter((id) => !existingBookIds.has(id));
 
-    for (const bookId of booksToAdd) {
+    const validBooks = await prisma.book.findMany({
+      where: {
+        id: { in: booksToAdd },
+      },
+      select: { id: true },
+    });
+
+    const validBookIds = new Set(validBooks.map((book) => book.id));
+    const filteredBooksToAdd = booksToAdd.filter((id) => validBookIds.has(id));
+
+    for (const bookId of filteredBooksToAdd) {
       await prisma.userFavorites.create({
         data: { userId: req.session.userId, bookId },
       });
@@ -295,12 +310,11 @@ export const syncFavorites = async (req, res) => {
     });
 
     return res.status(200).json({
-      message: 'Favorites synced successfully',
-      favorites: updatedFavorites.map(f => f.bookId),
+      message: "Favorites synced successfully",
+      favorites: updatedFavorites.map((f) => f.bookId),
     });
-
   } catch (error) {
-    res.status(500).json({ error: 'Failed to sync favorites', errorDetails: error.message });
+    res.status(500).json({ error: "Failed to sync favorites", errorDetails: error.message });
   }
 };
 
