@@ -210,13 +210,19 @@ export const addFavorite = async (req, res) => {
     if (existing) {
       return res.status(409).json({ error: 'Book already favorited by this user' });
     }
+
+    const book = await prisma.book.findUnique({ where: { id: titleId }, select: { id: true, title: true, type: true, cover: true } });
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+
     await prisma.userFavorites.create({
       data: {
         userId: req.session.userId,
         bookId: titleId,
       }
     });
-    res.status(201).json({ message: 'Favorite added successfully' });
+    res.status(201).json({ message: 'Favorite added successfully', book });
   } catch (error) {
     res.status(500).json({ error: 'Failed to add favorite', errorDetails: error.message });
   }
