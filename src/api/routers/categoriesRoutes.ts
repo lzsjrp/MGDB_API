@@ -6,10 +6,10 @@ import { useToken } from '../middlewares/useToken.js';
 
 export const router = express.Router();
 
-router.get('/', useToken, categoriesController.getAllCategories);
+router.get('/', categoriesController.getAllCategories);
 
 router.post('/', useToken, categoriesController.createCategory);
-router.get('/:categoryId', useToken, categoriesController.getCategoryById);
+router.get('/:categoryId', categoriesController.getCategoryById);
 router.patch('/:categoryId', useToken, categoriesController.updateCategory);
 router.delete('/:categoryId', useToken, categoriesController.deleteCategory);
 
