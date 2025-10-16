@@ -15,8 +15,9 @@ export const createUser = async (req, res) => {
             }
             const newUser = await tx.user.create({
                 data: { email, name, password: hash },
+                select: { id: true, email: true, name: true, permissions: true }
             });
-            return res.status(201).json({ id: newUser.id, email: newUser.email, name: newUser.name });
+            return res.status(201).json({ message: "User registered successfully", user: newUser});
         })
     }
     catch (error) {
