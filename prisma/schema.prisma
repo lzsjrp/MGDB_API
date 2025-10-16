@@ -78,6 +78,17 @@ model Book {
   favoritedBy UserFavorites[]
 }
 
+model Categories {
+  id       String   @id @default(uuid())
+  name     String   @unique
+  booksIds String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
 model BookVolume {
   id      String @id @default(uuid())
   bookId  String
