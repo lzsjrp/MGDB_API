@@ -131,7 +131,7 @@ export const getTitleList = async (req, res) => {
       where: whereFilter,
       skip: (pageNumber - 1) * pageSize,
       take: pageSize,
-      include: { volumes: true, cover: true },
+      include: { volumes: false, cover: true },
       orderBy: orderByClause,
     });
 
