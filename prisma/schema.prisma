@@ -40,6 +40,22 @@ model UserFavorites {
   @@index([bookId])
 }
 
+model Scanlator {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  website     String?
+  discord     String?
+  twitter     String?
+  languages   String[]
+  addedBy     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  uploads BookChapter[]
+}
+
 model Session {
   id     String @id @default(uuid())
   userId String
@@ -108,19 +124,21 @@ model BookVolume {
 }
 
 model BookChapter {
-  id       String  @id @default(uuid())
-  bookId   String
-  volumeId String
-  title    String
-  number   Int
-  content  String?
-  addedBy  String
+  id          String  @id @default(uuid())
+  bookId      String
+  volumeId    String
+  title       String
+  number      Int
+  scanlatorId String?
+  content     String?
+  addedBy     String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  volume BookVolume     @relation(fields: [volumeId], references: [id], onDelete: Cascade)
-  images ImageChapter[]
+  volume    BookVolume     @relation(fields: [volumeId], references: [id], onDelete: Cascade)
+  scanlator Scanlator?     @relation(fields: [scanlatorId], references: [id], onDelete: SetNull)
+  images    ImageChapter[]
 
   @@index([volumeId])
 }

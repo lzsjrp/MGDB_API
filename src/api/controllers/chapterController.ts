@@ -9,7 +9,7 @@ export const createChapter = async (req, res) => {
         if (!req.body.number || req.body.number < 1) {
             return res.status(400).json({ error: "Chapter number must be a positive integer" });
         }
-        if (!req.body.volume || req.body.volume < 1) {
+        if (req.body.volume && req.body.volume < 1) {
             return res.status(400).json({ error: "Volume must be a positive integer" });
         }
         const existingBook = await prisma.book.findUnique({
@@ -18,26 +18,27 @@ export const createChapter = async (req, res) => {
         if (!existingBook) {
             return res.status(404).json({ error: "Title not found" });
         }
-        const existingChapter = await prisma.bookChapter.findFirst({
-            where: {
-                bookId: titleId,
-                number: Number(req.body.number),
-            },
-        });
-        if (existingChapter) {
-            return res.status(409).json({ error: "Chapter already exists" });
-        }
         await prisma.$transaction(async (tx) => {
+            if (req.body.scanlatorId) {
+                const existingScanlator = await tx.scanlator.findUnique({
+                    where: { id: req.body.scanlatorId }
+                })
+                if (!existingScanlator) {
+                    return res.status(404).json({ error: "Scanlator not found" });
+                }
+            }
+
+            const volume = req.body.volume ? Number(req.body.volume) : 1;
             const updatedVolume = await tx.bookVolume.upsert({
                 where: {
                     bookId_number: {
                         bookId: titleId,
-                        number: Number(req.body.volume),
+                        number: volume,
                     }
                 },
                 create: {
                     bookId: titleId,
-                    number: Number(req.body.volume),
+                    number: volume,
                     addedBy: req.session.userId,
                     title: req.body.volumeTitle || `Volume ${req.body.volume}`,
                 },
@@ -46,6 +47,7 @@ export const createChapter = async (req, res) => {
                     title: req.body.volumeTitle || `Volume ${req.body.volume}`,
                 },
             });
+
             const newChapter = await tx.bookChapter.create({
                 data: {
                     bookId: titleId,
@@ -54,6 +56,7 @@ export const createChapter = async (req, res) => {
                     number: Number(req.body.number),
                     content: req.body.content || undefined,
                     addedBy: req.session.userId,
+                    scanlatorId: req.body.scanlatorId || undefined,
                 },
             });
             return res.status(201).json({ id: newChapter.id, message: "Chapter created successfully", chapter: newChapter, updatedVolume });
@@ -75,7 +78,7 @@ export const getChapter = async (req, res) => {
         }
         const chapter = await prisma.bookChapter.findUnique({
             where: { id: chapterId, bookId: titleId },
-            include: { images: existingBook.type === "WEB_NOVEL" ? false : true }
+            include: { scanlator: true, images: existingBook.type === "WEB_NOVEL" ? false : true }
         });
         if (!chapter) {
             return res.status(404).json({ error: "Chapter not found" });
@@ -106,6 +109,7 @@ export const getChapterList = async (req, res) => {
                 addedBy: true,
                 createdAt: true,
                 updatedAt: true,
+                scanlator: true,
             }
         })
         return res.status(200).json({ bookId: titleId, chapters })
