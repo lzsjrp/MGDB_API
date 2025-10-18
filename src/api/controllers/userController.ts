@@ -1,10 +1,17 @@
 import prisma from "../lib/prisma.js";
+import validate from "../middlewares/validate.js";
 import bcrypt from "bcrypt";
 
 export const createUser = async (req, res) => {
     const { email, name, password } = req.body || {};
-    if (!email || !name || !password) {
-        return res.status(400).json({ error: "Missing required fields" });
+    if (!email || !validate.email(email)) {
+        return res.status(400).json({ error: "Invalid or missing email" });
+    }
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+        return res.status(400).json({ error: "Invalid or missing name" });
+    }
+    if (!password || !validate.password(password)) {
+        return res.status(400).json({ error: "Invalid or missing password. Password must be 8-20 characters long, include at least one uppercase letter, one lowercase letter, one number, and one special character." });
     }
     try {
         const hash = await bcrypt.hash(password, 10);
@@ -99,8 +106,11 @@ export const updateUser = async (req, res) => {
     if (req.session.userId !== id && req.session.user.email !== id) {
         return res.status(403).json({ error: "Unauthorized to update this user" });
     }
-    if (!email && !name && !password) {
-        return res.status(400).json({ error: "No fields to update" });
+    if (email && !validate.email(email)) {
+        return res.status(400).json({ error: "Invalid email format" });
+    }
+    if (password && !validate.password(password)) {
+        return res.status(400).json({ error: "Invalid password format. Password must be 8-20 characters long, include at least one uppercase letter, one lowercase letter, one number, and one special character." });
     }
     try {
         await prisma.$transaction(async (tx) => {
