@@ -3,8 +3,16 @@ import prisma from "../lib/prisma.js";
 export const getAllCategories = async (req, res) => {
   try {
     const categories = await prisma.categories.findMany({
-      select: { id: true, name: true, createdAt: true, updatedAt: true },
+      select: { id: true, name: true, createdAt: true, updatedAt: true},
     });
+
+    categories.unshift({
+      id: 'recently-added',
+      name: 'Recently Added',
+      createdAt: new Date(Date.now()),
+      updatedAt: new Date(Date.now()),
+    });
+
     res.json({ categories });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch categories", errorDetails: error });
@@ -103,6 +111,25 @@ export const deleteBookFromCategory = async (req, res) => {
 export const getCategoryById = async (req, res) => {
   const { categoryId } = req.params;
   try {
+    if (categoryId === 'recently-added') {
+
+      const booksIds = await prisma.book.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        select: { id: true },
+      }).then(books => books.map(book => book.id));
+
+      return res.status(200).json({ 
+        category: {
+          id: 'recently-added',
+          name: 'Recently Added',
+          createdAt: new Date(Date.now()),
+          updatedAt: new Date(Date.now()),
+          booksIds,
+        } 
+      });
+      
+    }
     const category = await prisma.categories.findUnique({
       where: { id: categoryId },
     });
