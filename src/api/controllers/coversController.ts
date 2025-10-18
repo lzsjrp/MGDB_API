@@ -8,6 +8,13 @@ export const uploadCover = async (req, res) => {
         if (!req.file.buffer) {
             return res.status(400).json({ error: "No image uploaded" });
         }
+        const book = await prisma.book.findUnique({
+            where: { id: titleId }
+        });
+
+        if (!book) {
+            return res.status(404).json({ error: "Book not found" });
+        }
         const fileName = titleId + path.extname(req.file.originalname).toLowerCase();
         const titleCover = await prisma.$transaction(async (tx) => {
             const { data, error } = await supabase.storage
