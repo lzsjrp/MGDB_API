@@ -2,6 +2,7 @@ import prisma from "../lib/prisma.js";
 import path from "path"
 import * as uuid from "uuid"
 import supabase from "../lib/supabase.js";
+import validate from "../middlewares/validate.js";
 
 export const createChapter = async (req, res) => {
     const { titleId } = req.params;
@@ -11,6 +12,9 @@ export const createChapter = async (req, res) => {
         }
         if (req.body.volume && req.body.volume < 1) {
             return res.status(400).json({ error: "Volume must be a positive integer" });
+        }
+        if (!validate.language(req.body.language)) {
+            return res.status(400).json({ error: "Invalid language. Expected 'xx-XX' (e.g., 'en-US', 'pt-BR')" });
         }
         const existingBook = await prisma.book.findUnique({
             where: { id: titleId }
@@ -53,6 +57,7 @@ export const createChapter = async (req, res) => {
                     bookId: titleId,
                     volumeId: updatedVolume.id,
                     title: req.body.title || `Chapter ${req.body.number}`,
+                    language: req.body.language,
                     number: Number(req.body.number),
                     content: req.body.content || undefined,
                     addedBy: req.session.userId,
@@ -109,6 +114,7 @@ export const getChapterList = async (req, res) => {
                 addedBy: true,
                 createdAt: true,
                 updatedAt: true,
+                language: true,
                 scanlator: true,
             }
         })
